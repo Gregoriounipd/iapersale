@@ -138,7 +138,7 @@ export default function VenueFinderPage() {
   const sorted = results?.venues?.slice().sort((a, b) => b.score - a.score) || [];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f0e0c", fontFamily: "Georgia,'Times New Roman',serif", color: "#f0e6d0" }}>
+    <div style={{ minHeight: "100vh", background: "#0f0e0c", fontFamily: "var(--font-body)", color: "#f0e6d0" }}>
 
       {/* Header */}
       <div style={{ borderBottom: "1px solid #2a2418", padding: "28px 32px 22px", background: "linear-gradient(180deg,#1a1408 0%,transparent 100%)" }}>
