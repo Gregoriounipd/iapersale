@@ -22,34 +22,51 @@ export async function POST(request) {
         model: "claude-haiku-4-5-20251001",
         max_tokens: 4000,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
-        system: `Sei un assistente per event planner professionisti in Veneto, Italia.
-Devi cercare location REALI usando la ricerca web. Non inventare mai nomi o indirizzi.
+        system: `Sei un assistente specializzato per un event planner del Veneto che organizza FESTE PRIVATE: compleanni (18°, 30°, 40°, 50°, 60°, 70°), battesimi, comunioni, cresime, lauree, anniversari di coppia.
 
-Il criterio PRINCIPALE è: la location affitta lo spazio in modo ESCLUSIVO senza obbligo di catering interno?
+NON cercare location per matrimoni, congressi, eventi aziendali o fiere. Quello non è il tuo target.
 
-SISTEMA DI PUNTEGGIO:
-- 100: Sala esclusiva, nessun catering obbligatorio, l'organizzatore porta i suoi fornitori
-- 80-90: Spazio esclusivo, catering interno opzionale
-- 50-70: Politica catering non chiara, da verificare telefonicamente
-- 20-40: Catering interno OBBLIGATORIO
-- 10: Nessuna sala eventi
+Il tuo cliente porta TUTTO: catering esterno, animatori, DJ, decorazioni. Ha bisogno SOLO dello spazio.
 
-IMPORTANTE: Usa la ricerca web per trovare location VERE. Cerca su Google, siti di eventi, TripAdvisor ecc.
-Se non trovi abbastanza risultati reali, meglio restituirne 3 certi che 6 inventati.
+CRITERI DI RICERCA — cerca questi tipi di location NASCOSTE che spesso non si promuovono per feste:
+- Agriturismi con sala interna o gazebo affittabile
+- Ville storiche o rustici con sala ricevimenti
+- Centri sportivi o piscine con sala feste
+- Cantine vinicole con spazi eventi
+- Cascine ristrutturate
+- Parchi o ville comunali affittabili
+- Locali polivalenti, circoli, oratori con salone
+- Hotel con sala affittabile senza pacchetto obbligatorio
+- Ristoranti che affittano la sala anche senza il loro menu (raro ma esiste)
+
+ESCLUDI categoricamente:
+- Location che si promuovono SOLO per matrimoni
+- Ristoranti che impongono il loro catering
+- Sale congressi e hotel business
+- Qualsiasi posto con "wedding" come unico servizio
+
+SISTEMA DI PUNTEGGIO (score 0-100) basato su UN solo criterio: posso affittare lo spazio portando catering e fornitori esterni?
+- 100: Confermato — spazio esclusivo, catering libero, nessun obbligo interno
+- 80-90: Molto probabile — segnali chiari di flessibilità, ma da confermare
+- 50-70: Incerto — potrebbe funzionare, chiamare per chiedere esplicitamente
+- 20-40: Difficile — tendono ad imporre servizi interni
+- 10: No — solo matrimoni o catering obbligatorio
+
+Usa la ricerca web per trovare location REALI. Non inventare mai. Meglio 3 risultati veri che 6 falsi.
 
 Rispondi SOLO con JSON valido, zero markdown, zero backtick:
 {
   "venues": [
     {
-      "name": "Nome reale trovato online",
-      "type": "Tipo",
+      "name": "Nome reale",
+      "type": "Tipo preciso (es. Agriturismo, Villa storica, Centro sportivo...)",
       "score": 85,
       "address": "Indirizzo reale",
       "phone": "telefono se trovato",
       "website": "URL reale se trovato",
-      "why": "Perché questo punteggio",
-      "signals": ["elemento trovato online 1", "elemento trovato online 2"],
-      "note": "Consiglio pratico",
+      "why": "Spiegazione diretta: perché questo score, cosa ho trovato online",
+      "signals": ["segnale concreto 1", "segnale concreto 2"],
+      "note": "Cosa chiedere quando chiami: es. 'Chiedere se affittano la sala senza obbligo catering interno'",
       "lat": 45.4064,
       "lng": 11.8768
     }
@@ -59,10 +76,17 @@ Rispondi SOLO con JSON valido, zero markdown, zero backtick:
 }`,
         messages: [{
           role: "user",
-          content: `Cerca su web location REALI a ${city} (Veneto, Italia) per organizzare: ${type}. 
-Priorità a spazi esclusivi senza catering obbligatorio.
-Cerca termini come: "sala eventi ${city}", "location ${city} compleanno", "villa affitto ${city} eventi", "agriturismo ${city} sala".
-Trova solo luoghi che esistono davvero — verifica che siano reali prima di includerli.`
+          content: `Cerca location a ${city} (Veneto, Italia) per: ${type}.
+
+Fai più ricerche web con questi termini:
+- "sala feste ${city}"
+- "sala ricevimenti ${city} affitto"  
+- "agriturismo ${city} sala eventi"
+- "location ${city} compleanno"
+- "villa ${city} feste private"
+
+Includi anche posti poco conosciuti o che non si promuovono molto online — quelli nascosti sono i più interessanti.
+Escludi tutto ciò che riguarda matrimoni o catering obbligatorio.`
         }]
       })
     });
@@ -74,14 +98,10 @@ Trova solo luoghi che esistono davvero — verifica che siano reali prima di inc
     }
 
     const data = await response.json();
-    console.log("Anthropic OK, blocks:", data.content?.length);
-
     const text = (data.content || [])
       .filter(b => b.type === "text")
       .map(b => b.text)
       .join("");
-
-    console.log("Raw AI text (first 500):", text.substring(0, 500));
 
     const clean = text.replace(/```json|```/g, "").trim();
     const match = clean.match(/\{[\s\S]*\}/);
