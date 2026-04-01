@@ -16,47 +16,53 @@ export async function POST(request) {
         "Content-Type": "application/json",
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
+        "anthropic-beta": "web-search-2025-03-05",
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 2000,
+        max_tokens: 4000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
         system: `Sei un assistente per event planner professionisti in Veneto, Italia.
-Il criterio di valutazione PRINCIPALE è: la location affitta lo spazio in modo ESCLUSIVO senza obbligo di catering interno? L'event planner porta i propri servizi (catering, animazione, ecc.).
+Devi cercare location REALI usando la ricerca web. Non inventare mai nomi o indirizzi.
 
-SISTEMA DI PUNTEGGIO (score da 0 a 100):
-- 100: Sala/spazio esclusivo affittabile, nessun catering interno obbligatorio
-- 80-90: Spazio esclusivo disponibile, catering interno opzionale (non obbligatorio)
-- 50-70: Spazio disponibile ma politica catering non chiara, da verificare
-- 20-40: Catering interno OBBLIGATORIO, no fornitori esterni
-- 10: Nessuna sala eventi disponibile
+Il criterio PRINCIPALE è: la location affitta lo spazio in modo ESCLUSIVO senza obbligo di catering interno?
 
-Conosci bene il Veneto. Suggerisci location REALI e plausibili: ville storiche, agriturismi, parchi, musei, dimore, centri sportivi, resort, cantine vinicole, cascine.
+SISTEMA DI PUNTEGGIO:
+- 100: Sala esclusiva, nessun catering obbligatorio, l'organizzatore porta i suoi fornitori
+- 80-90: Spazio esclusivo, catering interno opzionale
+- 50-70: Politica catering non chiara, da verificare telefonicamente
+- 20-40: Catering interno OBBLIGATORIO
+- 10: Nessuna sala eventi
 
-Rispondi SOLO con JSON valido, zero markdown, zero testo extra, zero backtick.`,
-        messages: [{
-          role: "user",
-          content: `Trova 6 location a ${city} (Veneto) adatte per: ${type}. Priorità assoluta a spazi esclusivi senza catering obbligatorio.
+IMPORTANTE: Usa la ricerca web per trovare location VERE. Cerca su Google, siti di eventi, TripAdvisor ecc.
+Se non trovi abbastanza risultati reali, meglio restituirne 3 certi che 6 inventati.
 
-Rispondi SOLO con questo JSON (niente altro):
+Rispondi SOLO con JSON valido, zero markdown, zero backtick:
 {
   "venues": [
     {
-      "name": "Nome location",
-      "type": "Tipo (Villa storica / Agriturismo / ecc.)",
-      "score": 95,
-      "address": "Indirizzo, Comune (PD)",
-      "phone": "",
-      "website": "",
-      "why": "Spiegazione del punteggio",
-      "signals": ["segnale1", "segnale2"],
+      "name": "Nome reale trovato online",
+      "type": "Tipo",
+      "score": 85,
+      "address": "Indirizzo reale",
+      "phone": "telefono se trovato",
+      "website": "URL reale se trovato",
+      "why": "Perché questo punteggio",
+      "signals": ["elemento trovato online 1", "elemento trovato online 2"],
       "note": "Consiglio pratico",
       "lat": 45.4064,
       "lng": 11.8768
     }
   ],
-  "city": "${city}",
-  "total": 6
-}`
+  "city": "nome città",
+  "total": 5
+}`,
+        messages: [{
+          role: "user",
+          content: `Cerca su web location REALI a ${city} (Veneto, Italia) per organizzare: ${type}. 
+Priorità a spazi esclusivi senza catering obbligatorio.
+Cerca termini come: "sala eventi ${city}", "location ${city} compleanno", "villa affitto ${city} eventi", "agriturismo ${city} sala".
+Trova solo luoghi che esistono davvero — verifica che siano reali prima di includerli.`
         }]
       })
     });
@@ -64,7 +70,7 @@ Rispondi SOLO con questo JSON (niente altro):
     if (!response.ok) {
       const errBody = await response.text();
       console.error("Anthropic API error:", response.status, errBody);
-      return NextResponse.json({ error: `Errore API Anthropic: ${response.status} — ${errBody}` }, { status: 500 });
+      return NextResponse.json({ error: `Errore API Anthropic: ${response.status}` }, { status: 500 });
     }
 
     const data = await response.json();
@@ -75,7 +81,7 @@ Rispondi SOLO con questo JSON (niente altro):
       .map(b => b.text)
       .join("");
 
-    console.log("Raw AI text (first 300):", text.substring(0, 300));
+    console.log("Raw AI text (first 500):", text.substring(0, 500));
 
     const clean = text.replace(/```json|```/g, "").trim();
     const match = clean.match(/\{[\s\S]*\}/);
