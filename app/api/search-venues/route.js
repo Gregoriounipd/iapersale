@@ -20,73 +20,49 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 4000,
+        max_tokens: 5000,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
-        system: `Sei un assistente specializzato per un event planner del Veneto che organizza FESTE PRIVATE: compleanni (18°, 30°, 40°, 50°, 60°, 70°), battesimi, comunioni, cresime, lauree, anniversari di coppia.
+        system: `Sei un assistente per un event planner veneto esperto in feste private: compleanni (18°, 30°, 40°, 50°, 60°), lauree, battesimi, comunioni, anniversari. Porta sempre catering e fornitori suoi — cerca solo spazi affittabili.
 
-NON cercare location per matrimoni, congressi, eventi aziendali o fiere. Quello non è il tuo target.
+CRITERIO UNICO DI SELEZIONE: il posto affitta lo spazio in modo esclusivo senza imporre catering interno?
+Non importa se è un agriturismo, una villa, un capannone — importa solo se puoi portare i tuoi fornitori.
 
-Il tuo cliente porta TUTTO: catering esterno, animatori, DJ, decorazioni. Ha bisogno SOLO dello spazio.
+SEGNALI POSITIVI da cercare:
+- "affitto spazi" / "noleggio sala" / "sala disponibile per eventi privati"
+- "portate il vostro catering" / "catering esterno ammesso"  
+- Sala separata dall'attività principale (non il ristorante stesso)
+- Strutture con più sale indipendenti affittabili
 
-CRITERI DI RICERCA — cerca questi tipi di location NASCOSTE che spesso non si promuovono per feste:
-- Agriturismi con sala interna o gazebo affittabile
-- Ville storiche o rustici con sala ricevimenti
-- Centri sportivi o piscine con sala feste
-- Cantine vinicole con spazi eventi
-- Cascine ristrutturate
-- Parchi o ville comunali affittabili
-- Locali polivalenti, circoli, oratori con salone
-- Hotel con sala affittabile senza pacchetto obbligatorio
-- Ristoranti che affittano la sala anche senza il loro menu (raro ma esiste)
+SEGNALI NEGATIVI da ignorare:
+- "pacchetto tutto incluso" / "menu obbligatorio"
+- Location che parlano SOLO di matrimoni
+- Ristoranti che affittano solo con il loro menu
 
-ESCLUDI categoricamente:
-- Location che si promuovono SOLO per matrimoni
-- Ristoranti che impongono il loro catering
-- Sale congressi e hotel business
-- Qualsiasi posto con "wedding" come unico servizio
+RAGGIO DI RICERCA: non limitarti al comune esatto. Includi comuni entro 15 minuti di auto — paesi limitrofi, frazioni, provincia.
 
-SISTEMA DI PUNTEGGIO (score 0-100) basato su UN solo criterio: posso affittare lo spazio portando catering e fornitori esterni?
-- 100: Confermato — spazio esclusivo, catering libero, nessun obbligo interno
-- 80-90: Molto probabile — segnali chiari di flessibilità, ma da confermare
-- 50-70: Incerto — potrebbe funzionare, chiamare per chiedere esplicitamente
-- 20-40: Difficile — tendono ad imporre servizi interni
-- 10: No — solo matrimoni o catering obbligatorio
+STRATEGIA DI RICERCA — fai queste ricerche in sequenza:
+1. "affitto sala feste [città] provincia" 
+2. "sala ricevimenti [città] catering esterno"
+3. "location [tipo evento] [città] e dintorni"
+4. "dove fare festa [tipo evento] [città]" (articoli e blog locali)
+5. "[città] sala privata affitto ore"
 
-Usa la ricerca web per trovare location REALI. Non inventare mai. Meglio 3 risultati veri che 6 falsi.
+Gli articoli di blog tipo "dove festeggiare la laurea a [città]" sono OTTIMI — citano posti nascosti che non si trovano cercando direttamente.
 
-Rispondi SOLO con JSON valido, zero markdown, zero backtick:
-{
-  "venues": [
-    {
-      "name": "Nome reale",
-      "type": "Tipo preciso (es. Agriturismo, Villa storica, Centro sportivo...)",
-      "score": 85,
-      "address": "Indirizzo reale",
-      "phone": "telefono se trovato",
-      "website": "URL reale se trovato",
-      "why": "Spiegazione diretta: perché questo score, cosa ho trovato online",
-      "signals": ["segnale concreto 1", "segnale concreto 2"],
-      "note": "Cosa chiedere quando chiami: es. 'Chiedere se affittano la sala senza obbligo catering interno'",
-      "lat": 45.4064,
-      "lng": 11.8768
-    }
-  ],
-  "city": "nome città",
-  "total": 5
-}`,
+SCORE (0-100) — solo su: posso affittare lo spazio portando tutto dall'esterno?
+100=confermato online, 80=molto probabile, 50=da verificare al telefono, 20=improbabile, 10=no
+
+Rispondi SOLO con JSON valido, no markdown, no backtick:
+{"venues":[{"name":"","type":"","score":0,"address":"","phone":"","website":"","why":"spiegazione concisa","signals":["segnale trovato online"],"note":"cosa chiedere quando chiami","lat":0,"lng":0}],"city":"","total":0}
+
+Minimo 5 risultati reali verificati. Mai inventare nomi o indirizzi.`,
         messages: [{
           role: "user",
-          content: `Cerca location a ${city} (Veneto, Italia) per: ${type}.
+          content: `Trova location per: ${type} a ${city} (Veneto) e dintorni entro 15 minuti di auto.
 
-Fai più ricerche web con questi termini:
-- "sala feste ${city}"
-- "sala ricevimenti ${city} affitto"  
-- "agriturismo ${city} sala eventi"
-- "location ${city} compleanno"
-- "villa ${city} feste private"
-
-Includi anche posti poco conosciuti o che non si promuovono molto online — quelli nascosti sono i più interessanti.
-Escludi tutto ciò che riguarda matrimoni o catering obbligatorio.`
+Inizia cercando articoli e liste tipo "dove festeggiare ${type.toLowerCase()} a ${city}" — spesso citano posti nascosti ottimi.
+Poi cerca direttamente con "affitto sala ${city}" e "sala feste ${city} provincia".
+Includi anche comuni vicini a ${city}.`
         }]
       })
     });
