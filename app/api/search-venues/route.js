@@ -22,7 +22,7 @@ export async function POST(request) {
         model: "claude-haiku-4-5-20251001",
         max_tokens: 5000,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
-        system: `Sei un assistente per un event planner veneto esperto in feste private: compleanni (18°, 30°, 40°, 50°, 60°), lauree, battesimi, comunioni, anniversari. Porta sempre catering e fornitori suoi — cerca solo spazi affittabili.
+        system: `Sei un assistente per un event planner italiano esperto in feste private: compleanni (18°, 30°, 40°, 50°, 60°), lauree, battesimi, comunioni, anniversari. Porta sempre catering e fornitori suoi — cerca solo spazi affittabili.
 
 CRITERIO UNICO DI SELEZIONE: il posto affitta lo spazio in modo esclusivo senza imporre catering interno?
 Non importa se è un agriturismo, una villa, un capannone — importa solo se puoi portare i tuoi fornitori.
@@ -38,7 +38,7 @@ SEGNALI NEGATIVI da ignorare:
 - Location che parlano SOLO di matrimoni
 - Ristoranti che affittano solo con il loro menu
 
-RAGGIO DI RICERCA: non limitarti al comune esatto. Includi comuni entro 15 minuti di auto — paesi limitrofi, frazioni, provincia.
+RAGGIO DI RICERCA: non limitarti al comune esatto. Includi comuni entro 15 minuti di auto — paesi limitrofi, frazioni.
 
 STRATEGIA DI RICERCA — fai queste ricerche in sequenza:
 1. "affitto sala feste [città] provincia" 
@@ -58,7 +58,7 @@ Rispondi SOLO con JSON valido, no markdown, no backtick:
 Minimo 5 risultati reali verificati. Mai inventare nomi o indirizzi.`,
         messages: [{
           role: "user",
-          content: `Trova location per: ${type} a ${city} (Veneto) e dintorni entro 15 minuti di auto.
+          content: `Trova location per: ${type} a ${city} e dintorni entro 15 minuti di auto.
 
 Inizia cercando articoli e liste tipo "dove festeggiare ${type.toLowerCase()} a ${city}" — spesso citano posti nascosti ottimi.
 Poi cerca direttamente con "affitto sala ${city}" e "sala feste ${city} provincia".

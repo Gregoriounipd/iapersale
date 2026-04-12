@@ -138,16 +138,16 @@ export default function VenueFinderPage() {
   const sorted = results?.venues?.slice().sort((a, b) => b.score - a.score) || [];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f0e0c", fontFamily: "var(--font-body)", color: "#f0e6d0" }}>
+    <div style={{ minHeight: "100vh", background: "#0f0e0c", fontFamily: "Georgia,'Times New Roman',serif", color: "#f0e6d0" }}>
 
       {/* Header */}
       <div style={{ borderBottom: "1px solid #2a2418", padding: "28px 32px 22px", background: "linear-gradient(180deg,#1a1408 0%,transparent 100%)" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ margin: 0, fontSize: "26px", fontWeight: 400 }}>
-            🏛️ Venue<span style={{ color: "#c9963e" }}>Finder</span> Veneto
+            🏛️ Venue<span style={{ color: "#c9963e" }}>Finder</span>
           </h1>
           <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#5a4a30", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Solo spazi esclusivi · Catering libero · Per event planner
+            Solo spazi esclusivi · Catering libero · Tutta Italia
           </p>
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function VenueFinderPage() {
                 style={inputStyle}
               />
               <div style={{ marginTop: 5, fontSize: "11px", color: "#3a3020" }}>
-                Funziona con qualsiasi comune del Veneto
+                Funziona con qualsiasi città italiana
               </div>
             </div>
 
@@ -302,7 +302,7 @@ export default function VenueFinderPage() {
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#2a2418" }}>
             <div style={{ fontSize: "52px", marginBottom: "14px" }}>🏡</div>
             <p style={{ margin: 0, fontSize: "13px", color: "#3a3020" }}>
-              Scrivi un comune del Veneto — anche piccoli come Este, Soave, Montagnana...
+              Scrivi qualsiasi città italiana...
             </p>
           </div>
         )}
