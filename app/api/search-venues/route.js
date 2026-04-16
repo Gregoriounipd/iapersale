@@ -53,7 +53,7 @@ SCORE (0-100) — solo su: posso affittare lo spazio portando tutto dall'esterno
 100=confermato online, 80=molto probabile, 50=da verificare al telefono, 20=improbabile, 10=no
 
 Rispondi SOLO con JSON valido, no markdown, no backtick:
-{"venues":[{"name":"","type":"","score":0,"address":"","phone":"","website":"","why":"spiegazione concisa","signals":["segnale trovato online"],"note":"cosa chiedere quando chiami","lat":0,"lng":0}],"city":"","total":0}
+{"venues":[{"name":"","type":"","score":0,"address":"","phone":"","website":"","email":"email contatti se trovata","why":"spiegazione concisa","signals":["segnale trovato online"],"note":"cosa chiedere quando chiami","lat":0,"lng":0}],"city":"","total":0}
 
 Minimo 5 risultati reali verificati. Mai inventare nomi o indirizzi.`,
         messages: [{

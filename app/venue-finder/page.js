@@ -110,6 +110,36 @@ export default function VenueFinderPage() {
   const [error, setError]       = useState(null);
   const [view, setView]         = useState("list");
   const [expanded, setExpanded] = useState(null);
+  const [emailModal, setEmailModal] = useState(null);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState({});
+  const [guestCount, setGuestCount] = useState("50");
+
+  const sendEmail = async (venue) => {
+    if (!venue.email) return;
+    setEmailSending(true);
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venueName: venue.name,
+          venueEmail: venue.email,
+          eventType: type,
+          guestCount,
+          senderName: "Greg",
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setEmailSent(prev => ({ ...prev, [venue.name]: true }));
+      setEmailModal(null);
+    } catch (e) {
+      alert("Errore invio email: " + e.message);
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const search = async () => {
     if (!city.trim()) return;
@@ -279,6 +309,13 @@ export default function VenueFinderPage() {
                           {venue.lat && venue.lng && (
                             <a href={`https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`} target="_blank" rel="noopener noreferrer" style={linkStyle}>🗺️ Google Maps</a>
                           )}
+                          {venue.email && (
+                            emailSent[venue.name]
+                              ? <span style={{ fontSize: "13px", color: "#4ade80" }}>✓ Email inviata</span>
+                              : <button onClick={(e) => { e.stopPropagation(); setEmailModal(venue); }} style={{ background: "#c9963e22", border: "1px solid #c9963e55", borderRadius: "6px", padding: "3px 12px", color: "#c9963e", fontSize: "13px", fontFamily: "inherit", cursor: "pointer" }}>
+                                  📧 Invia richiesta
+                                </button>
+                          )}
                         </div>
                         {venue.note && (
                           <div style={{ background: "#0f0e0c", border: "1px solid #2a2418", borderRadius: "8px", padding: "10px 14px", fontSize: "12px", color: "#7a6a50", fontStyle: "italic" }}>
@@ -307,6 +344,42 @@ export default function VenueFinderPage() {
           </div>
         )}
       </div>
+
+      {/* Email Modal */}
+      {emailModal && (
+        <div onClick={() => setEmailModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#16140f", border: "1px solid #2a2418", borderRadius: "12px", padding: "28px 32px", maxWidth: "480px", width: "100%" }}>
+            <h3 style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 400, color: "#f0e6d0" }}>📧 Invia richiesta</h3>
+            <p style={{ margin: "0 0 20px", fontSize: "12px", color: "#5a4a30" }}>{emailModal.name} · {emailModal.email}</p>
+            
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", fontSize: "11px", color: "#5a4a30", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "6px" }}>Numero ospiti</label>
+              <input
+                value={guestCount}
+                onChange={e => setGuestCount(e.target.value)}
+                style={{ background: "#0f0e0c", border: "1px solid #2a2418", borderRadius: "6px", padding: "8px 12px", color: "#f0e6d0", fontSize: "14px", fontFamily: "inherit", outline: "none", width: "100px", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ background: "#0f0e0c", border: "1px solid #2a2418", borderRadius: "8px", padding: "14px 16px", fontSize: "12px", color: "#7a6a50", lineHeight: "1.6", marginBottom: "20px", fontStyle: "italic" }}>
+              Gentili,<br/><br/>
+              mi chiamo Gregorio e volevo richiedere informazioni.<br/>
+              Sto cercando una location per un <strong style={{color:"#c9963e"}}>{type}</strong> con circa <strong style={{color:"#c9963e"}}>{guestCount} persone</strong>.<br/><br/>
+              Vorrei sapere se è possibile affittare uno spazio esclusivo e se è consentito portare catering esterno o vi organizzate in maniera diversa.<br/><br/>
+              Cordiali saluti,<br/>Gregorio – 
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button onClick={() => setEmailModal(null)} style={{ background: "transparent", border: "1px solid #2a2418", borderRadius: "6px", padding: "8px 18px", color: "#5a4a30", fontSize: "13px", fontFamily: "inherit", cursor: "pointer" }}>
+                Annulla
+              </button>
+              <button onClick={() => sendEmail(emailModal)} disabled={emailSending} style={{ background: emailSending ? "#2a2418" : "linear-gradient(135deg,#c9963e,#a67a2e)", border: "none", borderRadius: "6px", padding: "8px 22px", color: emailSending ? "#5a4a30" : "#0f0e0c", fontSize: "13px", fontWeight: 700, fontFamily: "inherit", cursor: emailSending ? "not-allowed" : "pointer" }}>
+                {emailSending ? "Invio..." : "Invia →"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
